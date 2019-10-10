@@ -1,0 +1,225 @@
+<div class="container mt-5" dir="rtl">
+
+  <!-- Alert -->
+  <div class="text-right myAlert" role="alert"></div>
+
+  <!-- formGroup -->
+  <div class="jumbotron justify-content-center" style="background: linear-gradient(to left, #17a2b8, #86a8e7, #91eae4);">
+
+    <form [formGroup]="formGroup">
+
+      <div class="row">
+
+        <div class="col-md-5">
+            <div class="form-group">
+              <select class="form-control" formControlName="clinic" (change)="onChoosingClinic()">
+                <option hidden>اختار العيادة</option>
+                <option *ngFor="let clinic of clinics">{{ clinic }}</option>
+              </select>
+            </div>
+        </div>
+
+        <div class="col-md-5" *ngIf="displayDoctorField">
+            <div class="form-group">
+              <select class="form-control" id="doctorSelect" formControlName="doctor" (change)="onChoosingDoctor()">
+                <option hidden>اختار الطبیب</option>
+                <option *ngFor="let doctor of doctors">{{ doctor }}</option>
+              </select>
+            </div>
+        </div>
+
+      </div>
+
+    </form>
+
+  </div>
+
+  <!-- Table -->
+  <div class="text-right" [style.display]="doctorName === '' ? 'none' : 'block'">
+    <h5>مواعيد عيادة {{ clinicName }} للدكتور {{ doctorName }}</h5>
+
+    <div class="table-responsive scrollableTable mt-4 mb-5">
+      <table class="table table-bordered">
+        <thead style="position:sticky; top: 0">
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">{{ today }}</th>
+            <th scope="col">{{ day2 }}</th>
+            <th scope="col">{{ day3 }}</th>
+            <th scope="col">{{ day4 }}</th>
+            <th scope="col">{{ day5 }}</th>
+            <th scope="col">{{ day6 }}</th>
+            <th scope="col">{{ day7 }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let time of scheduleArr; let i = index">
+            <td dir="auto">{{ time }}</td>
+
+            <td *ngFor="let status of scheduleStatusArr"><div class="btn-group">
+                <button type="button" class="btn btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                [ngClass]="{
+                  'btn-info': status === 'متاح',
+                  'btn-danger': status === 'محجوز',
+                  'btn-secondary': status === 'تم الكشف'
+                }">
+                 {{ status }}
+                </button>
+                <div class="dropdown-menu">
+                  <a class="btn dropdown-item text-center" *ngIf="status === 'متاح'" data-toggle="modal" data-target=".bd-example-modal-lg">حجز</a>
+                  <a class="btn dropdown-item text-center" *ngIf="status === 'محجوز'" data-toggle="modal" data-target="#exampleModal">تنفیذ الكشف</a>
+                  <a class="btn dropdown-item text-center" *ngIf="status === 'محجوز'" data-toggle="modal" data-target="#exampleModal2">إلغاءه</a>
+                  <a class="btn dropdown-item text-center" *ngIf="status === 'تم الكشف'" data-toggle="modal" data-target=".bd-example-modal-lg2">عرض</a>
+                </div>
+              </div>
+            </td>
+
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal للحجز -->
+  <div class="modal fade bd-example-modal-lg" id="formModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title">حجز موعد مع {{ doctorName }}</h5>
+        </div>
+
+        <form [formGroup]="scheduleForm">
+          <div class="modal-body mt-4 mb-4">
+            <div class="row">
+
+              <div class="col-md-6">
+                <div class="form-group">
+                  <input type="text" class="form-control" formControlName="name" placeholder="الاسم">
+                </div>
+              </div>
+
+
+              <div class="col-md-3" *ngIf="displayDoctorField">
+                <div class="form-group">
+                  <input type="number" class="form-control" formControlName="age" placeholder="السن">
+                </div>
+              </div>
+
+              <div class="col-md-3" *ngIf="displayDoctorField">
+                <div class="form-group">
+                  <input type="number" class="form-control" formControlName="mobile" placeholder="الموبيل">
+                </div>
+              </div>
+
+            </div>
+
+            <div class="row mt-2">
+
+              <div class="col-md-6" *ngIf="displayDoctorField">
+                <div class="form-group">
+                  <select type="text" class="form-control" formControlName="services" id="multiselect"><!--class="custom-select" multiple="multiple" -->
+                    <option hidden>الخدمات</option>
+                    <option *ngFor="let service of servicesArr">{{ service }}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="col-md-6" *ngIf="displayDoctorField">
+                <div class="form-group">
+                  <input type="text" class="form-control" formControlName="address" placeholder="العنوان">
+                </div>
+              </div>
+
+            </div>
+        </div>
+
+        <div class="modal-footer">
+          <button [disabled]="scheduleForm.invalid" type="button" class="btn btn-info ml-2" (click)="onSubmitScheduleForm();">تاكيد الحجز</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">الغاء</button>
+        </div>
+      </form>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal2 تنفیذ الكشف -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">تاكيد تنفیذ الكشف مع {{ doctorName }}</h5>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-info ml-2" (click)="onMeetingSchedule()" data-dismiss="modal">تاكيد</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">الغاء</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal3 تنفیذ الكشف -->
+  <div class="modal fade" id="exampleModal2" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">تاكيد الغاء الكشف</h5>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-info ml-2" (click)="onCancellingSchedule()" data-dismiss="modal">تاكيد</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">الغاء</button>
+        </div>
+      </div>
+    </div>ٍ
+  </div>
+
+  <!-- Modal4 عرض -->
+  <div class="modal fade bd-example-modal-lg2" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title">عرض بيانات المريض</h5>
+        </div>
+
+        <div class="modal-body mt-4 mb-4 text-right">
+          <div class="row">
+
+            <div class="col-md-5">
+              <p>الاسم: اسم المريض</p>
+            </div>
+
+            <div class="col-md-3">
+              <p>السن: 30</p>
+            </div>
+
+            <div class="col-md-4">
+              <p>الموبيل: 000 0000 0000</p>
+            </div>
+
+          </div>
+
+          <div class="row mt-2">
+
+            <div class="col-md-5">
+              <p>العنوان: ____________</p>
+            </div>
+
+            <div class="col-md-4">
+              <p>الخدمة: خدمة 8</p>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal"> اغلاق العرض</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+</div>

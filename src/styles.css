@@ -1,1 +1,17 @@
 /* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css?family=Changa&display=swap');
+
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Changa', sans-serif;
+}
+
+thead th, thead td {
+  text-align: center;
+}
+tbody th, tbody td {
+  text-align: center;
+}
+
